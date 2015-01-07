@@ -1,0 +1,35 @@
+{
+  "name": "react-dropdown",
+  "version": "1.0.0",
+  "description": "drop down menu with search, custom value and fix scroll for long list. Write from material ui",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "dropdown",
+    "menu",
+    "material",
+    "ui",
+    "searchable"
+  ],
+  "browserify": {
+    "transform": [
+      [
+        "reactify",
+        {
+          "es6": true
+        }
+      ]
+    ]
+  },
+  "author": "agency revolution",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^8.0.3",
+    "material-ui": "^0.5.0",
+    "react": "^0.12.2",
+    "reactify": "^0.17.1"
+  }
+}
