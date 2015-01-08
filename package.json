@@ -1,6 +1,6 @@
 {
   "name": "react-md-dropdown",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "drop down menu with search, custom value and fix scroll for long list. Write from material ui",
   "main": "index.js",
   "scripts": {

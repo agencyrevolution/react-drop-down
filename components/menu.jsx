@@ -184,7 +184,6 @@ var Menu = React.createClass({
     });
 
     this.refs.customValueInput.setValue(value);
-    this.refs.customPayloadInput.setValue(value);
     this.setState({menuItems: items, searchValue: value});
 
   },
@@ -209,7 +208,7 @@ var Menu = React.createClass({
 
     
     var value = {
-      payload: this.refs.customPayloadInput.getValue(),
+      payload: this.refs.customValueInput.getValue(),
       text: this.refs.customValueInput.getValue(),
       isHide: false
     };
@@ -230,7 +229,6 @@ var Menu = React.createClass({
     return (
       <Dialog actions={dialogActions} ref="customValueDialog">
         <Input name="customValue" ref="customValueInput" defaultValue={value} placeholder="Value" />
-        <Input name="customValue" ref="customPayloadInput" defaultValue={value} placeholder="Payload" />
       </Dialog>
     )
   },

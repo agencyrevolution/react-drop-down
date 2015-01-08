@@ -45,14 +45,12 @@ var DropDownMenu = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps.hasOwnProperty('selectedIndex')) {
-      this.setState(
+    this.setState(
         {
           selectedIndex: nextProps.selectedIndex, 
           menuItems: nextProps.menuItems,
           open: false
         });
-    }
   },
 
   render: function() {
@@ -85,10 +83,19 @@ var DropDownMenu = React.createClass({
           onItemClick={this._onMenuItemClick}
           enableCustomValue={this.props.enableCustomValue} 
           enableFilter = {this.props.enableFilter}
-          onCreateNewValue = {this.props.onCreateNewValue}
+          onCreateNewValue = {this._onCreateNewValue}
           fixScroll = {this.props.fixScroll} />
       </div>
     );
+  },
+
+  _onCreateNewValue: function(value) {
+    this.state.menuItems.push(value);
+    this.state.selectedIndex = this.state.menuItems.length - 1;
+    this.state.open = false;
+    this.setState({menuItems: this.state.menuItems});
+    if (this.props.onCreateNewValue)
+      this.props.onCreateNewValue(value);
   },
 
   _setWidth: function() {

@@ -3,7 +3,7 @@ var React = require('react'),
   Classable = mui.Mixins.Classable,
   Icon = mui.Icon,
   Toggle = mui.Toggle,
-  Ripple = mui.Ripple,
+  Ripple = require('./ripple.jsx'),
   Types = {
     LINK: 'LINK',
     SUBHEADER: 'SUBHEADER',
