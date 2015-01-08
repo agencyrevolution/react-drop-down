@@ -121,6 +121,7 @@ var Menu = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
+    this.selectedIndex = nextProps.selectedIndex;
     this.setState({menuItems: nextProps.menuItems, selectedIndex: nextProps.selectedIndex});
     if (this.props.enableFilter){
       this.refs.searchBox.setValue('');  
@@ -143,7 +144,7 @@ var Menu = React.createClass({
     //this.refs.dialogTest.show();
   },
 
-  componentDidUpdate: function(prevProps, prevState) {
+  componentWillUpdate: function(prevProps, prevState) {
     if (this.props.visible !== prevProps.visible) {
       this._resetMenuItems();
       if (this.props.enableFilter){
@@ -151,6 +152,11 @@ var Menu = React.createClass({
       }
     }
     this._renderVisibility();
+  },
+
+  componentDidUpdate: function(prevProps, prevState) {
+    var menuItemNode = this.refs.menuItems.getDOMNode();
+    menuItemNode.scrollTop = KeyLine.Desktop.MENU_ITEM_HEIGHT * (this.selectedIndex - 1)  ;
   },
 
   render: function() {
@@ -164,13 +170,23 @@ var Menu = React.createClass({
       { text: 'SUBMIT', onClick: this._onDialogSubmit }
     ];
 
-
     return (
       <Paper ref="paperContainer" zDepth={this.props.zDepth} className={classes}>
-        {this._getChildren()}
+        {this._renderInput()}
+        <div style={{height: this.childrenHeight, overflow: 'scroll'}} ref="menuItems">
+          {this._getChildren()}
+        </div>
         {this._renderDialog(this.state.searchValue)}
       </Paper>
     );
+  },
+
+  _renderInput: function() {
+    if (this.props.enableFilter){
+        return (
+          <Input placeholder="Search here" name="searchBox" ref="searchBox" onChange={this._onSearchValueChange}/>
+        )
+    }
   },
 
   _onSearchValueChange: function(e, value) {
@@ -237,17 +253,12 @@ var Menu = React.createClass({
     var children = [],
       menuItem,
       itemComponent,
+      searchInputStyle,
       isSelected;
 
     //This array is used to keep track of all nested menu refs
     this._nestedChildren = [];
     //This array is used to keep track of all nested menu refs
-    if (this.props.enableFilter){
-      children.push(
-        <Input placeholder="Search here" name="searchBox" ref="searchBox" onChange={this._onSearchValueChange}/>
-      );  
-    }
-
     for (var i=0; i < this.props.menuItems.length; i++) {
       menuItem = this.props.menuItems[i];
       isSelected = i === this.props.selectedIndex;
@@ -342,6 +353,21 @@ var Menu = React.createClass({
     return h - el.getBoundingClientRect().top - 20;
   },
 
+  _getMenuResultHeight: function(el) {
+    var menuHeight = this._getMenuHeight(el);
+    if (this.props.enableFilter){
+      menuHeight -= 120;
+    }
+    this._initialMenuHeight = (KeyLine.Desktop.MENU_ITEM_HEIGHT) * (this._getVisibleMenuItemsLength() + 1);
+
+    //Open the menu
+    if (this.props.fixScroll) {
+       return Math.min(this._initialMenuHeight, menuHeight);
+    } else {
+      return this._initialMenuHeight;
+    }
+  },
+
   _renderVisibility: function() {
     var el;
 
@@ -350,27 +376,30 @@ var Menu = React.createClass({
       var innerContainer = this.refs.paperContainer.getInnerContainer().getDOMNode();
       
       if (this.props.visible) {
-        
-        if (this.props.enableFilter)
-          this._initialMenuHeight = (KeyLine.Desktop.MENU_ITEM_HEIGHT) * (this._getVisibleMenuItemsLength() + 1) + 118;
+        this.childrenHeight = this._getMenuResultHeight(el);
+        // menuItemNode.scrollTo(0,200);
+        // this.setState(this.state);
+        // if (this.props.enableFilter)
+        //   this._initialMenuHeight = (KeyLine.Desktop.MENU_ITEM_HEIGHT) * (this._getVisibleMenuItemsLength() + 1) + 118;
          
-        //Open the menu
-        if (this.props.fixScroll) {
-           el.style.height = Math.min(this._initialMenuHeight, this._getMenuHeight(el)) + 'px';
-        } else {
-          el.style.height = this._initialMenuHeight + 'px';
-        }
-        
+        // //Open the menu
+        // if (this.props.fixScroll) {
+        //    el.style.height = Math.min(this._initialMenuHeight, this._getMenuHeight(el)) + 'px';
+        // } else {
+        //   el.style.height = this._initialMenuHeight + 'px';
+        // }
+        el.style.height = 'initial';
         //Set the overflow to visible after the animation is done so
         //that other nested menus can be shown
         CssEvent.onTransitionEnd(el, function() {
           //Make sure the menu is open before setting the overflow.
           //This is to accout for fast clicks
-          if (this.props.fixScroll) {
-            if (this.props.visible) innerContainer.style.overflow = 'scroll'; 
-          } else {
-            if (this.props.visible) innerContainer.style.overflow = 'visible'; 
-          }
+          // if (this.props.fixScroll) {
+          //   if (this.props.visible) innerContainer.style.overflow = 'scroll'; 
+          // } else {
+          //   if (this.props.visible) innerContainer.style.overflow = 'visible'; 
+          // }
+          if (this.props.visible) innerContainer.style.overflow = 'visible'; 
         }.bind(this));
 
       } else {
@@ -390,6 +419,8 @@ var Menu = React.createClass({
 
   _onItemClick: function(e, index) {
     if (this.props.onItemClick) this.props.onItemClick(e, index, this.props.menuItems[index]);
+
+    this.selectedIndex = index;
   },
 
   _onItemToggle: function(e, index, toggled) {
