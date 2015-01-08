@@ -32,7 +32,8 @@ var DropDownMenu = React.createClass({
   getInitialState: function() {
     return {
       open: false,
-      selectedIndex: this.props.selectedIndex
+      selectedIndex: this.props.selectedIndex,
+      menuItems: this.props.menuItems
     }
   },
 
@@ -42,6 +43,7 @@ var DropDownMenu = React.createClass({
 
   componentDidMount: function() {
     if (this.props.autoWidth) this._setWidth();
+    this.setState({menuItems: this.props.menuItems});
   },
 
   componentWillReceiveProps: function(nextProps) {
@@ -59,7 +61,7 @@ var DropDownMenu = React.createClass({
     });
 
     var chooseText = 'Choose';
-    if (this.state.selectedIndex || this.state.selectedIndex ===0){
+    if (this.state.selectedIndex || this.state.selectedIndex === 0 && this.props.menuItems[this.state.selectedIndex] ){
       chooseText =  this.props.menuItems[this.state.selectedIndex].text
     }
 
@@ -89,11 +91,12 @@ var DropDownMenu = React.createClass({
     );
   },
 
+
   _onCreateNewValue: function(value) {
     this.state.menuItems.push(value);
     this.state.selectedIndex = this.state.menuItems.length - 1;
     this.state.open = false;
-    this.setState({menuItems: this.state.menuItems});
+    this.setState(this.state);
     if (this.props.onCreateNewValue)
       this.props.onCreateNewValue(value);
   },

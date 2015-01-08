@@ -3,8 +3,10 @@ var React = require('react'),
   CssEvent = mui.Utils.CssEvent,
   Dom = mui.Utils.Dom,
   KeyLine = mui.Utils.KeyLine,
+  KeyCode = mui.Utils.KeyCode,
   Classable = mui.Mixins.Classable,
   ClickAwayable = mui.Mixins.ClickAwayable,
+  WindowListenable = mui.Mixins.WindowListenable,
   Paper = mui.Paper,
   MenuItem = require('./menu-item.jsx'),
   Dialog = mui.Dialog,
@@ -84,7 +86,7 @@ var NestedMenuItem = React.createClass({
  ****************/
 var Menu = React.createClass({
 
-  mixins: [Classable],
+  mixins: [Classable, WindowListenable],
 
   propTypes: {
     autoWidth: React.PropTypes.bool,
@@ -100,6 +102,8 @@ var Menu = React.createClass({
     fixScroll: React.PropTypes.bool,
     onCreateNewValue: React.PropTypes.func
   },
+
+
 
   getInitialState: function() {
     return { 
@@ -121,8 +125,10 @@ var Menu = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    this.selectedIndex = nextProps.selectedIndex;
+    // this.selectedIndex = nextProps.selectedIndex;
+    console.log('componentWillReceiveProps(nextProps)', nextProps);
     this.setState({menuItems: nextProps.menuItems, selectedIndex: nextProps.selectedIndex});
+    console.log('componentWillReceiveProps(selectedIndex)', this.state.selectedIndex);
     if (this.props.enableFilter){
       this.refs.searchBox.setValue('');  
     }
@@ -131,7 +137,7 @@ var Menu = React.createClass({
 
   componentDidMount: function() {
     var el = this.getDOMNode();
-
+    this.setState({selectedIndex: this.props.selectedIndex});
     //Set the menu with
     this._setKeyWidth(el);
 
@@ -145,6 +151,7 @@ var Menu = React.createClass({
   },
 
   componentWillUpdate: function(prevProps, prevState) {
+    console.log('componentWillUpdate()', this.state.selectedIndex);
     if (this.props.visible !== prevProps.visible) {
       this._resetMenuItems();
       if (this.props.enableFilter){
@@ -155,8 +162,8 @@ var Menu = React.createClass({
   },
 
   componentDidUpdate: function(prevProps, prevState) {
-    var menuItemNode = this.refs.menuItems.getDOMNode();
-    menuItemNode.scrollTop = KeyLine.Desktop.MENU_ITEM_HEIGHT * (this.selectedIndex - 1)  ;
+    // this.scrollToMenuItem(this.state.selectedIndex);
+    console.log('componentDidUpdate()', this.state.selectedIndex);
   },
 
   render: function() {
@@ -171,9 +178,16 @@ var Menu = React.createClass({
     ];
 
     return (
-      <Paper ref="paperContainer" zDepth={this.props.zDepth} className={classes}>
+      <Paper 
+        style={{outline: 0}}
+        onKeyUp={this._handleWindowKeyUp}
+        tabIndex = {1}
+        ref="paperContainer"
+        zDepth={this.props.zDepth} 
+        className={classes}>
+
         {this._renderInput()}
-        <div style={{height: this.childrenHeight, overflow: 'scroll'}} ref="menuItems">
+        <div style={{height: this.childrenHeight, overflow: 'scroll', minHeight: 100}} ref="menuItems" >
           {this._getChildren()}
         </div>
         {this._renderDialog(this.state.searchValue)}
@@ -190,7 +204,8 @@ var Menu = React.createClass({
   },
 
   _onSearchValueChange: function(e, value) {
-    // console.log('onSearchValueChange(e, value)', value);
+    
+    console.log('onSearchValueChange(e, value)', value);
     
     var items = this.state.menuItems.map(function(item) {
       if(item.text.toLowerCase().indexOf(value.toLowerCase()) === -1) {
@@ -203,6 +218,36 @@ var Menu = React.createClass({
     this.setState({menuItems: items, searchValue: value});
 
   },
+
+  _handleWindowKeyUp: function(e) {
+    console.log('_handleWindowKeyUp(e)', e);
+    var selectedIndex = this.state.selectedIndex;
+    switch (e.keyCode) {
+      case KeyCode.UP:
+        selectedIndex = this._findPreviousVisibleItem(selectedIndex);
+        this.setState({selectedIndex: selectedIndex});
+        break;
+      case KeyCode.DOWN:
+        selectedIndex = this._findNextVisibleItem(selectedIndex);
+        this.setState({selectedIndex: selectedIndex});        
+        break;
+      case KeyCode.ENTER: 
+        this._onItemClick(null, selectedIndex);
+        break;
+      case KeyCode.ESC:
+        selectedIndex = this.props.selectedIndex;
+        this.props.visible = false;
+        this.setState({selectedIndex: selectedIndex});
+        break;
+    }
+  },
+
+  scrollToMenuItem: function(index) {
+    var menuItemNode = this.refs.menuItems.getDOMNode();
+    menuItemNode.scrollTop = KeyLine.Desktop.MENU_ITEM_HEIGHT * (index - 2);
+    console.log('scrollToMenuItem(index)', index, menuItemNode.scrollTop);
+  },
+
   _getVisibleMenuItemsLength: function() {
     var items = this.state.menuItems.filter(function(item) {
       return !item.isHide;
@@ -212,11 +257,12 @@ var Menu = React.createClass({
   },
 
   _resetMenuItems: function() {
+    console.log('_resetMenuItems()');
     items = this.props.menuItems.map(function(item) {
       item.isHide = false;
       return item;
     });
-    this.setState({menuItems: items});
+    this.setState({menuItems: items, selectedIndex: this.props.selectedIndex});
   },
 
   _onCustomValueDialogSubmit: function() {
@@ -261,7 +307,7 @@ var Menu = React.createClass({
     //This array is used to keep track of all nested menu refs
     for (var i=0; i < this.props.menuItems.length; i++) {
       menuItem = this.props.menuItems[i];
-      isSelected = i === this.props.selectedIndex;
+      isSelected = i === this.state.selectedIndex;
 
       switch (menuItem.type) {
 
@@ -368,7 +414,28 @@ var Menu = React.createClass({
     }
   },
 
+  _findNextVisibleItem: function(index) {
+    if (!index&&index!==0) index = -1;
+    for (var i = index+1; i < this.state.menuItems.length-1; i++) {
+      if (!this.state.menuItems[i].isHide) {
+        return i;
+      }
+    }
+  },
+
+  _findPreviousVisibleItem: function(index) {
+    if (!index) index = this.state.menuItems.length;
+    for (var i = index-1; i >= 0; i--) {
+      if (!this.state.menuItems[i].isHide) {
+        return i;
+      }
+    }
+  },
+
   _renderVisibility: function() {
+
+    console.log('_renderVisibility()', this.state.selectedIndex);
+
     var el;
 
     if (this.props.hideable) {
@@ -377,6 +444,7 @@ var Menu = React.createClass({
       
       if (this.props.visible) {
         this.childrenHeight = this._getMenuResultHeight(el);
+        this.refs.paperContainer.getDOMNode().focus();
         // menuItemNode.scrollTo(0,200);
         // this.setState(this.state);
         // if (this.props.enableFilter)
@@ -419,8 +487,6 @@ var Menu = React.createClass({
 
   _onItemClick: function(e, index) {
     if (this.props.onItemClick) this.props.onItemClick(e, index, this.props.menuItems[index]);
-
-    this.selectedIndex = index;
   },
 
   _onItemToggle: function(e, index, toggled) {
