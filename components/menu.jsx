@@ -162,7 +162,7 @@ var Menu = React.createClass({
   },
 
   componentDidUpdate: function(prevProps, prevState) {
-    // this.scrollToMenuItem(this.state.selectedIndex);
+    this.scrollToMenuItem(this.state.selectedIndex);
     console.log('componentDidUpdate()', this.state.selectedIndex);
   },
 
@@ -180,7 +180,7 @@ var Menu = React.createClass({
     return (
       <Paper 
         style={{outline: 0}}
-        onKeyUp={this._handleWindowKeyUp}
+        onKeyDown={this._handleMenuKeyDown}
         tabIndex = {1}
         ref="paperContainer"
         zDepth={this.props.zDepth} 
@@ -196,9 +196,14 @@ var Menu = React.createClass({
   },
 
   _renderInput: function() {
+    
     if (this.props.enableFilter){
         return (
-          <Input placeholder="Search here" name="searchBox" ref="searchBox" onChange={this._onSearchValueChange}/>
+          <Input placeholder="Search here" 
+            name="searchBox" 
+            ref="searchBox" 
+            onChange={this._onSearchValueChange}
+            onKeyDown={this._handleSearchInputKeyDown}/>
         )
     }
   },
@@ -210,17 +215,20 @@ var Menu = React.createClass({
     var items = this.state.menuItems.map(function(item) {
       if(item.text.toLowerCase().indexOf(value.toLowerCase()) === -1) {
         item.isHide = true;
-      } else item.isHide = false;
+      } else {
+        item.isHide = false;
+      }
       return item;
     });
 
+    var nextShowIndex = this._findNextVisibleItem();
+    nextShowIndex = (nextShowIndex || nextShowIndex === 0) ? nextShowIndex : -1; 
     this.refs.customValueInput.setValue(value);
-    this.setState({menuItems: items, searchValue: value});
-
+    this.setState({menuItems: items, searchValue: value, selectedIndex: nextShowIndex});
   },
 
-  _handleWindowKeyUp: function(e) {
-    console.log('_handleWindowKeyUp(e)', e);
+  _handleMenuKeyDown: function(e) {
+    console.log('_handleMenuKeyDown(e)', e);
     var selectedIndex = this.state.selectedIndex;
     switch (e.keyCode) {
       case KeyCode.UP:
@@ -232,7 +240,10 @@ var Menu = React.createClass({
         this.setState({selectedIndex: selectedIndex});        
         break;
       case KeyCode.ENTER: 
-        this._onItemClick(null, selectedIndex);
+        if (selectedIndex > -1){
+          this._onItemClick(null, selectedIndex);  
+        } 
+        
         break;
       case KeyCode.ESC:
         selectedIndex = this.props.selectedIndex;
@@ -241,6 +252,17 @@ var Menu = React.createClass({
         break;
     }
   },
+
+  _handleSearchInputKeyDown: function(e) {
+    switch (e.keyCode) {
+      case KeyCode.ENTER:
+        if (this.refs.searchBox.getValue() && !this._getVisibleMenuItemsLength()) {
+          this._showDialog();
+        }
+        break;
+    }
+  },
+
 
   scrollToMenuItem: function(index) {
     var menuItemNode = this.refs.menuItems.getDOMNode();
@@ -287,10 +309,16 @@ var Menu = React.createClass({
       { text: 'SUBMIT', onClick: this._onCustomValueDialogSubmit}
     ];
 
+    var inputStyle = {
+      marginTop: 50,
+      marginLeft: 30
+    };
 
     return (
       <Dialog actions={dialogActions} ref="customValueDialog">
-        <Input name="customValue" ref="customValueInput" defaultValue={value} placeholder="Value" />
+        <div style={inputStyle}>
+          <Input name="customValue" ref="customValueInput" defaultValue={value} placeholder="Value" />
+        </div>
       </Dialog>
     )
   },
@@ -416,18 +444,20 @@ var Menu = React.createClass({
 
   _findNextVisibleItem: function(index) {
     if (!index&&index!==0) index = -1;
-    for (var i = index+1; i < this.state.menuItems.length-1; i++) {
-      if (!this.state.menuItems[i].isHide) {
-        return i;
+    console.log('_findNextVisibleItem', index);
+    for (var i = index+1; i < this.state.menuItems.length + index + 1; i++) {
+      var nextShowIndex = i%this.state.menuItems.length;
+      if (!this.state.menuItems[nextShowIndex].isHide) {
+        return nextShowIndex;
       }
     }
   },
 
   _findPreviousVisibleItem: function(index) {
     if (!index) index = this.state.menuItems.length;
-    for (var i = index-1; i >= 0; i--) {
-      if (!this.state.menuItems[i].isHide) {
-        return i;
+    for (var i = this.state.menuItems.length + index-1; i >= index - 1; i--) {
+      if (!this.state.menuItems[i%this.state.menuItems.length].isHide) {
+        return i % this.state.menuItems.length;
       }
     }
   },
