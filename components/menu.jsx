@@ -108,6 +108,7 @@ var Menu = React.createClass({
   getInitialState: function() {
     return { 
       nestedMenuShown: false,
+      selectedIndex: this.props.selectedIndex,
       menuItems: this.props.menuItems 
     }
   },
@@ -126,9 +127,9 @@ var Menu = React.createClass({
 
   componentWillReceiveProps: function(nextProps) {
     // this.selectedIndex = nextProps.selectedIndex;
-    console.log('componentWillReceiveProps(nextProps)', nextProps);
-    this.setState({menuItems: nextProps.menuItems, selectedIndex: nextProps.selectedIndex});
-    console.log('componentWillReceiveProps(selectedIndex)', this.state.selectedIndex);
+    //console.log('componentWillReceiveProps(nextProps)', nextProps);
+    this.setState({selectedIndex: nextProps.selectedIndex});
+    // console.log('componentWillReceiveProps(selectedIndex)', this.state.selectedIndex);
     if (this.props.enableFilter){
       this.refs.searchBox.setValue('');  
     }
@@ -137,7 +138,7 @@ var Menu = React.createClass({
 
   componentDidMount: function() {
     var el = this.getDOMNode();
-    this.setState({selectedIndex: this.props.selectedIndex});
+    //this.setState({selectedIndex: this.props.selectedIndex});
     //Set the menu with
     this._setKeyWidth(el);
 
@@ -151,7 +152,7 @@ var Menu = React.createClass({
   },
 
   componentWillUpdate: function(prevProps, prevState) {
-    console.log('componentWillUpdate()', this.state.selectedIndex);
+    //console.log('componentWillUpdate()', this.state.selectedIndex);
     if (this.props.visible !== prevProps.visible) {
       this._resetMenuItems();
       if (this.props.enableFilter){
@@ -163,7 +164,7 @@ var Menu = React.createClass({
 
   componentDidUpdate: function(prevProps, prevState) {
     this.scrollToMenuItem(this.state.selectedIndex);
-    console.log('componentDidUpdate()', this.state.selectedIndex);
+    //console.log('componentDidUpdate()', this.state.selectedIndex);
   },
 
   render: function() {
@@ -210,7 +211,7 @@ var Menu = React.createClass({
 
   _onSearchValueChange: function(e, value) {
     
-    console.log('onSearchValueChange(e, value)', value);
+    //console.log('onSearchValueChange(e, value)', value);
     
     var items = this.state.menuItems.map(function(item) {
       if(item.text.toLowerCase().indexOf(value.toLowerCase()) === -1) {
@@ -228,7 +229,7 @@ var Menu = React.createClass({
   },
 
   _handleMenuKeyDown: function(e) {
-    console.log('_handleMenuKeyDown(e)', e);
+    //console.log('_handleMenuKeyDown(e)', e);
     var selectedIndex = this.state.selectedIndex;
     switch (e.keyCode) {
       case KeyCode.UP:
@@ -267,7 +268,7 @@ var Menu = React.createClass({
   scrollToMenuItem: function(index) {
     var menuItemNode = this.refs.menuItems.getDOMNode();
     menuItemNode.scrollTop = KeyLine.Desktop.MENU_ITEM_HEIGHT * (index - 2);
-    console.log('scrollToMenuItem(index)', index, menuItemNode.scrollTop);
+    //console.log('scrollToMenuItem(index)', index, menuItemNode.scrollTop);
   },
 
   _getVisibleMenuItemsLength: function() {
@@ -279,12 +280,12 @@ var Menu = React.createClass({
   },
 
   _resetMenuItems: function() {
-    console.log('_resetMenuItems()');
+    //console.log('_resetMenuItems()');
     items = this.props.menuItems.map(function(item) {
       item.isHide = false;
       return item;
     });
-    this.setState({menuItems: items, selectedIndex: this.props.selectedIndex});
+    this.setState({menuItems: items});
   },
 
   _onCustomValueDialogSubmit: function() {
@@ -444,7 +445,7 @@ var Menu = React.createClass({
 
   _findNextVisibleItem: function(index) {
     if (!index&&index!==0) index = -1;
-    console.log('_findNextVisibleItem', index);
+    //console.log('_findNextVisibleItem', index);
     for (var i = index+1; i < this.state.menuItems.length + index + 1; i++) {
       var nextShowIndex = i%this.state.menuItems.length;
       if (!this.state.menuItems[nextShowIndex].isHide) {
@@ -464,7 +465,7 @@ var Menu = React.createClass({
 
   _renderVisibility: function() {
 
-    console.log('_renderVisibility()', this.state.selectedIndex);
+    //console.log('_renderVisibility()', this.state.selectedIndex);
 
     var el;
 
