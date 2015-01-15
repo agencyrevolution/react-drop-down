@@ -127,8 +127,11 @@ var Menu = React.createClass({
 
   componentWillReceiveProps: function(nextProps) {
     // this.selectedIndex = nextProps.selectedIndex;
-    //console.log('componentWillReceiveProps(nextProps)', nextProps);
-    this.setState({selectedIndex: nextProps.selectedIndex});
+    console.log('Menu.componentWillReceiveProps(nextProps)', nextProps);
+    if (nextProps.hasOwnProperty('selectedIndex')) {
+      this.setState({selectedIndex: nextProps.selectedIndex});  
+    }
+    
     // console.log('componentWillReceiveProps(selectedIndex)', this.state.selectedIndex);
     if (this.props.enableFilter){
       this.refs.searchBox.setValue('');  
@@ -164,7 +167,8 @@ var Menu = React.createClass({
 
   componentDidUpdate: function(prevProps, prevState) {
     this.scrollToMenuItem(this.state.selectedIndex);
-    //console.log('componentDidUpdate()', this.state.selectedIndex);
+
+    console.log('componentDidUpdate()', this.state.selectedIndex);
   },
 
   render: function() {
@@ -200,7 +204,8 @@ var Menu = React.createClass({
     
     if (this.props.enableFilter){
         return (
-          <Input placeholder="Search here" 
+          <Input 
+            placeholder="Search here" 
             name="searchBox" 
             ref="searchBox" 
             onChange={this._onSearchValueChange}

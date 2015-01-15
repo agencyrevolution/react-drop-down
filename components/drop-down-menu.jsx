@@ -46,14 +46,13 @@ var DropDownMenu = React.createClass({
     this.setState({menuItems: this.props.menuItems});
   },
 
-  // componentDidUpdate: function(prevProps, prevState) {
-  //   if (prevProps.menuItems.length === this.props.menuItems.length) {
-  //     if (this.props.onChange) this.props.onChange(null, 0, this.props.menuItems[0]);
-  //   }
-  // },
+  componentDidUpdate: function(prevProps, prevState) {
+    console.log('componentDidUpdate()', this.state.selectedIndex);
+  },
 
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps.selectedIndex > -1){
+    console.log('dropdownmenu.componentWillReceiveProps(nextProps)', nextProps);
+    if (nextProps.hasOwnProperty('selectedIndex')){
       this.setState(
         {
           selectedIndex: nextProps.selectedIndex, 
@@ -130,6 +129,7 @@ var DropDownMenu = React.createClass({
 
   _onMenuItemClick: function(e, key, payload) {
     if (this.props.onChange && this.state.selectedIndex !== key) this.props.onChange(e, key, payload);
+    console.log('dropdownmenu._onMenuItemClick(key)', key);
     this.setState({
       selectedIndex: key,
       open: false
