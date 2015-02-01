@@ -1,4 +1,5 @@
 var React = require('react'),
+  PureRenderMixin = React.addons.PureRenderMixin,
   mui = require('material-ui'),
   Classable = mui.Mixins.Classable,
   ClickAwayable = mui.Mixins.ClickAwayable,
@@ -9,7 +10,7 @@ var React = require('react'),
 
 var DropDownMenu = React.createClass({
 
-  mixins: [Classable, ClickAwayable],
+  mixins: [Classable, ClickAwayable, PureRenderMixin],
 
   propTypes: {
     autoWidth: React.PropTypes.bool,
@@ -43,15 +44,13 @@ var DropDownMenu = React.createClass({
 
   componentDidMount: function() {
     if (this.props.autoWidth) this._setWidth();
-    this.setState({menuItems: this.props.menuItems});
+    this.setState({menuItems: this.props.menuItems, selected: this.props.selected});
   },
 
   componentDidUpdate: function(prevProps, prevState) {
-    console.log('componentDidUpdate()', this.state.selectedIndex);
   },
 
   componentWillReceiveProps: function(nextProps) {
-    console.log('dropdownmenu.componentWillReceiveProps(nextProps)', nextProps);
     if (nextProps.hasOwnProperty('selectedIndex')){
       this.setState(
         {
@@ -129,7 +128,6 @@ var DropDownMenu = React.createClass({
 
   _onMenuItemClick: function(e, key, payload) {
     if (this.props.onChange && this.state.selectedIndex !== key) this.props.onChange(e, key, payload);
-    console.log('dropdownmenu._onMenuItemClick(key)', key);
     this.setState({
       selectedIndex: key,
       open: false

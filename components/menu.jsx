@@ -1,4 +1,5 @@
 var React = require('react'),
+  PureRenderMixin = React.addons.PureRenderMixin,
   mui = require('material-ui'),
   CssEvent = mui.Utils.CssEvent,
   Dom = mui.Utils.Dom,
@@ -16,7 +17,7 @@ var React = require('react'),
  ***********************/
 var NestedMenuItem = React.createClass({
 
-  mixins: [Classable, ClickAwayable],
+  mixins: [Classable, ClickAwayable, PureRenderMixin],
 
   propTypes: {
     index: React.PropTypes.number.isRequired,
@@ -86,7 +87,7 @@ var NestedMenuItem = React.createClass({
  ****************/
 var Menu = React.createClass({
 
-  mixins: [Classable, WindowListenable],
+  mixins: [Classable, WindowListenable, ClickAwayable],
 
   propTypes: {
     autoWidth: React.PropTypes.bool,
@@ -104,6 +105,9 @@ var Menu = React.createClass({
   },
 
 
+  componentClickAway: function() {
+    this.setState({ selectedIndex: this.props.selectedIndex });
+  },
 
   getInitialState: function() {
     return { 
@@ -127,7 +131,6 @@ var Menu = React.createClass({
 
   componentWillReceiveProps: function(nextProps) {
     // this.selectedIndex = nextProps.selectedIndex;
-    console.log('Menu.componentWillReceiveProps(nextProps)', nextProps);
     if (nextProps.hasOwnProperty('selectedIndex')) {
       this.setState({selectedIndex: nextProps.selectedIndex});  
     }
@@ -167,8 +170,6 @@ var Menu = React.createClass({
 
   componentDidUpdate: function(prevProps, prevState) {
     this.scrollToMenuItem(this.state.selectedIndex);
-
-    console.log('componentDidUpdate()', this.state.selectedIndex);
   },
 
   render: function() {

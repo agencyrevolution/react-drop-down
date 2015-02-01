@@ -36,22 +36,12 @@ var MenuItem = React.createClass({
     return {
       toggle: false
     };
-  },
-
-  getInitialState: function() {
-    return {
-      selected: false 
-    };
-  },
-  componentWillReceiveProps: function(nextProps) {
-    console.log('Menu-item.componentWillReceiveProps()', nextProps);
-    this.setState({selected: this.props.selected});
-  },
-
+  }, 
+  
   render: function() {
     var showStyle = (this.props.isHide) ? {display: 'none'} : {};
     var classes = this.getClasses('mui-menu-item', {
-        'mui-selected': this.state.selected
+        'mui-is-selected': this.props.selected
       }),
       icon,
       data,
