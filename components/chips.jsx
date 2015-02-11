@@ -72,20 +72,27 @@ var DropDownMenu = React.createClass({
       'mui-open': this.state.open
     });
 
-    var chooseText = '';
+    var chooseText = [];
 
     if (this.state.selectedIndexs.length > 0) {
       _.forEach(this.state.selectedIndexs, function(index) {
         if (index > -1) {
-          chooseText += self.props.menuItems[index].text + ' ';
+          chooseText.push(
+            self.renderSelectedItem(self.props.menuItems[index].text)
+          )
         }
       });    
     }
+
+    var labelStyle = {
+      position: 'absolute',
+      marginTop: -50
+    };
     return (
       <div className={classes}>
         <div className="mui-menu-control" onClick={this._onControlClick}>
           <Paper className="mui-menu-control-bg" zDepth={0} />
-          <div className="mui-menu-label">
+          <div style={labelStyle}>
             {chooseText}
           </div>
           <Icon className="mui-menu-drop-down-icon" icon="navigation-arrow-drop-down" />
@@ -94,7 +101,7 @@ var DropDownMenu = React.createClass({
         <Menu
           ref="menuItems"
           autoWidth={this.props.autoWidth}
-          selectedIndex={this.state.selectedIndex}
+          selectedIndexs={this.state.selectedIndexs}
           menuItems={this.props.menuItems}
           hideable={true}
           visible={this.state.open}
@@ -106,11 +113,31 @@ var DropDownMenu = React.createClass({
     );
   },
 
+  renderSelectedItem: function(text) {
+    var selectedStyle = {
+      backgroundColor: '#eee',
+      float: 'left',
+      border: '1px solid',
+      borderRadius: '10px',
+      minWidth: '100px',
+      textAlign: 'center',
+      margin: 5,
+      padding: 5
+    };
+
+    return (
+      <div style={selectedStyle}>
+        {text}
+      </div>
+    )
+  },
+
   _setWidth: function() {
     var el = this.getDOMNode(),
       menuItemsDom = this.refs.menuItems.getDOMNode();
 
-    el.style.width = menuItemsDom.offsetWidth + 'px';
+    // el.style.width = menuItemsDom.offsetWidth + 'px';
+    el.style.width = '400' + 'px';
   },
 
   _onControlClick: function(e) {
@@ -118,11 +145,21 @@ var DropDownMenu = React.createClass({
   },
 
   _onMenuItemClick: function(e, key, payload) {
-    this.state.selectedIndexs.push(key);
-    this.setState({
-      selectedIndexs: this.state.selectedIndexs,
-      open: false
-    });
+    if (this.state.selectedIndexs.indexOf(key) > -1) {
+      this.state.selectedIndexs = _.reject(this.state.selectedIndexs, function(selected) {
+        return selected === key;
+      });
+      this.setState({
+        selectedIndexs: this.state.selectedIndexs,
+        open: false
+      });
+    } else {
+      this.state.selectedIndexs.push(key);
+      this.setState({
+        selectedIndexs: this.state.selectedIndexs,
+        open: false
+      });
+    }
     if (this.props.onChange) this.props.onChange(e, this.state.selectedIndexs);
   }
 

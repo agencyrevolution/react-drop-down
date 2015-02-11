@@ -343,7 +343,9 @@ var Menu = React.createClass({
     for (var i=0; i < this.props.menuItems.length; i++) {
       menuItem = this.props.menuItems[i];
       isSelected = i === this.state.selectedIndex;
-
+      if (this.props.selectedIndexs) {
+        isSelected = (this.props.selectedIndexs.indexOf(i) > -1);
+      }
       switch (menuItem.type) {
 
         case MenuItem.Types.LINK:
@@ -390,8 +392,13 @@ var Menu = React.createClass({
             </MenuItem>
           );
       }
-
+      if (this.props.dividerIndex === i) {
+        children.push(
+          <hr/>
+        )
+      }
       children.push(itemComponent);
+      // console.log(children);
     }
 
     if (this._getVisibleMenuItemsLength()=== 0) {

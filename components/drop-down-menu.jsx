@@ -98,7 +98,8 @@ var DropDownMenu = React.createClass({
           enableCustomValue={this.props.enableCustomValue} 
           enableFilter = {this.props.enableFilter}
           onCreateNewValue = {this._onCreateNewValue}
-          fixScroll = {this.props.fixScroll} />
+          fixScroll = {this.props.fixScroll}
+          dividerIndex = {this.props.dividerIndex} />
       </div>
     );
   },
